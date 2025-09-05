@@ -155,12 +155,21 @@
     .chat-input button:hover {
       background: #006fdd;
     }
+    .login-logo {
+  width: 150px;        /* size of the image */
+  height: 150px;
+  border-radius: 50%;  /* makes it round */
+  object-fit: cover;   /* maintain aspect ratio, fill the circle */
+  margin-bottom: 10px; /* spacing below the image */
+}
+
   </style>
 </head>
 <body>
 
   <!-- Login / Sign Up Screen -->
   <div id="login-screen">
+    <img src="images.jpg" alt="User1" class="login-logo">
     <h2>Welcome Kupal</h2>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Password" />
@@ -323,4 +332,5 @@
   </script>
 </body>
 </html>
+
 
