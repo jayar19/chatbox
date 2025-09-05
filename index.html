@@ -1,33 +1,195 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Firebase Chat Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messenger Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .chat-container {
+      width: 400px;
+      height: 650px;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .chat-header {
+      background: #0084ff;
+      color: white;
+      padding: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 16px;
+      font-weight: bold;
+    }
+    .chat-header .left {
+      display: flex;
+      align-items: center;
+    }
+    .chat-header img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+    .chat-header button {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+    .chat-header button:hover {
+      background: rgba(255,255,255,0.35);
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 10px;
+      background: #f0f2f5;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+    .message {
+      max-width: 70%;
+      padding: 8px 12px;
+      border-radius: 18px;
+      margin: 5px 0;
+      font-size: 15px;
+      word-wrap: break-word;
+      display: inline-block;
+    }
+    .sent {
+      background: #0084ff;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .received {
+      background: #e4e6eb;
+      color: black;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .username {
+      font-size: 11px;
+      margin-bottom: 2px;
+      color: #555;
+    }
+    .timestamp {
+      font-size: 10px;
+      margin-top: 3px;
+      color: gray;
+      text-align: right;
+      display: block;
+    }
+    .chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background: white;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ccc;
+      border-radius: 20px;
+      font-size: 14px;
+      outline: none;
+    }
+    .chat-input button {
+      margin-left: 10px;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 20px;
+      background: #0084ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .chat-input button:hover {
+      background: #006fdd;
+    }
+
+    /* Login screen */
+    #login-screen {
+      width: 350px;
+      padding: 30px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+    #login-screen input {
+      width: 90%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+    #login-screen button {
+      width: 95%;
+      padding: 12px;
+      margin: 10px 0;
+      border: none;
+      border-radius: 8px;
+      background: #0084ff;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #login-screen button:hover {
+      background: #006fdd;
+    }
+  </style>
 </head>
 <body>
-  <div id="login">
-    <input type="email" id="email" placeholder="Email"><br>
-    <input type="password" id="password" placeholder="Password"><br>
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <h2>Sign In</h2>
+    <input type="email" id="email" placeholder="Email (optional)" />
+    <input type="password" id="password" placeholder="Password (optional)" />
     <button onclick="signIn()">Sign In</button>
-    <button onclick="signInAnonymously()">Guest Login</button>
+    <button onclick="signInAnonymously()">Continue as Guest</button>
   </div>
 
-  <div id="chat" style="display:none;">
-    <h3>Chat</h3>
-    <div id="messages"></div>
-    <input id="msgInput" placeholder="Type message...">
-    <button onclick="sendMessage()">Send</button>
-    <button onclick="logout()">Logout</button>
+  <!-- Chat Screen -->
+  <div class="chat-container" id="chat-screen" style="display:none;">
+    <div class="chat-header">
+      <div class="left">
+        <img src="https://i.pravatar.cc/150?img=3" alt="User">
+        <span id="chat-username">Messenger Chat</span>
+      </div>
+      <button onclick="logout()">Logout</button>
+    </div>
+    <div class="chat-messages" id="messages"></div>
+    <div class="chat-input">
+      <input type="text" id="messageInput" placeholder="Type a message..." />
+      <button onclick="sendMessage()">Send</button>
+    </div>
   </div>
 
-  <!-- Firebase v8 SDK -->
+  <!-- Firebase v8 SDKs -->
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <script>
-const firebaseConfig = {
+    // Firebase Config
+    const firebaseConfig = {
   apiKey: "AIzaSyC84jwEt_YseFhQPM4qcaNkmcVgC6vbKoE",
   authDomain: "chatbox-21ee4.firebaseapp.com",
   databaseURL: "https://chatbox-21ee4-default-rtdb.firebaseio.com",
@@ -38,68 +200,102 @@ const firebaseConfig = {
   measurementId: "G-089VNLY7FJ"
 };
 
+    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
-    const db = firebase.database();
+    const database = firebase.database();
+    const messagesRef = database.ref("messages");
 
-    let currentUser;
+    let currentUser = null;
 
+    // Sign in with email
     function signIn() {
       const email = document.getElementById("email").value;
       const password = document.getElementById("password").value;
-      if (!email || !password) { alert("Enter email & password!"); return; }
 
-      auth.signInWithEmailAndPassword(email, password)
-        .catch(err => {
-          if (err.code === "auth/user-not-found") {
-            auth.createUserWithEmailAndPassword(email, password);
-          } else {
-            alert(err.message);
-          }
-        });
+      if (email && password) {
+        auth.signInWithEmailAndPassword(email, password)
+          .catch((error) => {
+            if (error.code === "auth/user-not-found") {
+              auth.createUserWithEmailAndPassword(email, password);
+            } else {
+              alert(error.message);
+            }
+          });
+      } else {
+        alert("Enter email & password or use Guest login.");
+      }
     }
 
+    // Anonymous Sign-In
     function signInAnonymously() {
-      auth.signInAnonymously().catch(err => alert(err.message));
+      auth.signInAnonymously().catch((error) => {
+        alert(error.message);
+      });
     }
 
+    // Logout
     function logout() {
       auth.signOut();
     }
 
-    auth.onAuthStateChanged(user => {
+    // Auth State Listener
+    auth.onAuthStateChanged((user) => {
       if (user) {
         currentUser = user;
-        document.getElementById("login").style.display = "none";
-        document.getElementById("chat").style.display = "block";
+        document.getElementById("login-screen").style.display = "none";
+        document.getElementById("chat-screen").style.display = "flex";
 
-        db.ref("messages").off();
-        db.ref("messages").on("child_added", snap => {
-          const msg = snap.val();
+        const name = user.isAnonymous ? "Guest" + user.uid.substring(0, 5) : user.email;
+        document.getElementById("chat-username").textContent = name;
+
+        messagesRef.off();
+        messagesRef.on("child_added", (snapshot) => {
+          const msg = snapshot.val();
           const div = document.createElement("div");
-          div.textContent = msg.user + ": " + msg.text;
+          div.classList.add("message");
+          div.classList.add(msg.user === name ? "sent" : "received");
+
+          const userLabel = document.createElement("div");
+          userLabel.classList.add("username");
+          userLabel.textContent = msg.user;
+
+          const textNode = document.createElement("div");
+          textNode.textContent = msg.text;
+
+          const timestamp = document.createElement("span");
+          timestamp.classList.add("timestamp");
+          const date = new Date(msg.timestamp);
+          timestamp.textContent = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+
+          div.appendChild(userLabel);
+          div.appendChild(textNode);
+          div.appendChild(timestamp);
+
           document.getElementById("messages").appendChild(div);
+          document.getElementById("messages").scrollTop = document.getElementById("messages").scrollHeight;
         });
+
       } else {
-        document.getElementById("login").style.display = "block";
-        document.getElementById("chat").style.display = "none";
+        document.getElementById("login-screen").style.display = "block";
+        document.getElementById("chat-screen").style.display = "none";
       }
     });
 
+    // Send message
     function sendMessage() {
-      const input = document.getElementById("msgInput");
-      if (input.value.trim() !== "" && currentUser) {
-        const name = currentUser.isAnonymous ? "Guest" : currentUser.email;
-        db.ref("messages").push({ text: input.value, user: name });
+      const input = document.getElementById("messageInput");
+      const text = input.value.trim();
+      if (text !== "" && currentUser) {
+        const name = currentUser.isAnonymous ? "Guest" + currentUser.uid.substring(0, 5) : currentUser.email;
+        messagesRef.push({
+          text: text,
+          user: name,
+          timestamp: Date.now()
+        });
         input.value = "";
       }
     }
   </script>
 </body>
 </html>
-
-
-
-
-
-
